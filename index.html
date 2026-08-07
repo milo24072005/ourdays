@@ -1,27 +1,70 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>♡</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#080b0a" />
+  <title>♡</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+  <main id="app">
+    <!-- OPENING / CRT TERMINAL -->
+    <section id="boot-screen" class="screen screen--visible" aria-live="polite">
+      <div class="crt-shell">
+        <div class="crt-screen">
+          <div class="crt-content">
+            <h1 class="terminal-title">HỆ THỐNG GHÉP ĐÔI VŨ TRỤ</h1>
 
-<section id="boot">
-  <div id="terminal"></div>
-</section>
+            <div class="terminal-stage">
+              <p id="status-line" class="status-line">
+                <span class="prompt">&gt;</span>
+                <span id="status-text"></span><span id="cursor" class="cursor">▋</span>
+              </p>
 
-<section id="main" class="hidden">
-  <p class="subtitle">the universe has been right for</p>
-  <div id="days">000</div>
-  <span class="label">days</span>
-  <div id="clock">00:00:00</div>
-</section>
+              <p id="value-line" class="value-line"></p>
 
-<script src="script.js"></script>
+              <div id="progress-wrap" class="progress-wrap hidden" aria-hidden="true">
+                <div class="progress-track">
+                  <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <span id="progress-label" class="progress-label">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="crt-vignette" aria-hidden="true"></div>
+          <div class="crt-scanlines" aria-hidden="true"></div>
+          <div class="crt-noise" aria-hidden="true"></div>
+          <div id="crt-flash" class="crt-flash" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN PAGE / TEMPORARY PLACEHOLDER -->
+    <section id="main-screen" class="screen hidden">
+      <div class="main-content">
+        <p class="main-kicker">the universe has been right for</p>
+
+        <div class="counter-block">
+          <div id="days" class="days">000</div>
+          <div class="days-label">days</div>
+        </div>
+
+        <div id="clock" class="clock">00:00:00</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>
