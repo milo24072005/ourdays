@@ -1,70 +1,615 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#080b0a" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090d0b">
   <title>♡</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
-    rel="stylesheet"
-  />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root{
+      --bg:#090d0b;
+      --screen:#0b110e;
+      --mint:#8dffd9;
+      --mint-dim:rgba(141,255,217,.66);
+      --mint-faint:rgba(141,255,217,.13);
+      --red:#ff8090;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    html,body{
+      width:100%;
+      min-height:100%;
+      background:var(--bg);
+    }
+
+    body{
+      min-height:100vh;
+      min-height:100dvh;
+      overflow:hidden;
+      font-family:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+      color:var(--mint);
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .hidden{display:none!important}
+
+    /* ---------- CRT OPENING ---------- */
+
+    #boot{
+      position:fixed;
+      inset:0;
+      min-height:100vh;
+      min-height:100dvh;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(40,70,58,.12), transparent 52%),
+        #070a08;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:
+        max(16px,env(safe-area-inset-top))
+        14px
+        max(16px,env(safe-area-inset-bottom));
+    }
+
+    .crt{
+      position:relative;
+      width:min(100%,430px);
+      height:min(88dvh,760px);
+      min-height:560px;
+      overflow:hidden;
+      border-radius:30px / 42px;
+      background:
+        radial-gradient(ellipse at 50% 45%,
+          #101a15 0%,
+          #0a100d 57%,
+          #050706 100%);
+      box-shadow:
+        inset 0 0 48px rgba(0,0,0,.78),
+        inset 0 0 105px rgba(0,0,0,.62),
+        0 24px 80px rgba(0,0,0,.5);
+      transform:perspective(850px) rotateX(.55deg) scaleX(.985);
+      animation:screenLife 5.3s ease-in-out infinite;
+    }
+
+    .content{
+      position:relative;
+      z-index:3;
+      height:100%;
+      padding:58px 29px 42px;
+    }
+
+    #title{
+      font-size:13px;
+      line-height:1.55;
+      font-weight:600;
+      letter-spacing:.09em;
+      color:var(--mint);
+      text-shadow:
+        0 0 4px rgba(141,255,217,.86),
+        0 0 12px rgba(141,255,217,.22);
+      opacity:0;
+      transform:translateY(3px);
+      animation:titleIn .65s ease .28s forwards;
+    }
+
+    .terminal{
+      margin-top:86px;
+      width:100%;
+    }
+
+    #status{
+      min-height:3.8em;
+      font-size:12.5px;
+      line-height:1.75;
+      font-weight:500;
+      letter-spacing:.005em;
+      color:var(--mint);
+      text-shadow:
+        0 0 4px rgba(141,255,217,.88),
+        0 0 10px rgba(141,255,217,.18);
+    }
+
+    .prompt{
+      margin-right:7px;
+      opacity:.9;
+    }
+
+    #cursor{
+      display:inline-block;
+      margin-left:2px;
+      animation:blink .72s steps(1,end) infinite;
+      text-shadow:0 0 7px rgba(141,255,217,.85);
+    }
+
+    #value{
+      min-height:2em;
+      margin-top:11px;
+      font-size:17px;
+      line-height:1.5;
+      font-weight:500;
+      color:var(--mint);
+      text-shadow:
+        0 0 4px rgba(141,255,217,.8),
+        0 0 13px rgba(141,255,217,.18);
+    }
+
+    #value.error{
+      color:var(--red);
+      text-shadow:
+        0 0 4px rgba(255,128,144,.85),
+        0 0 12px rgba(255,128,144,.25);
+    }
+
+    #progress{
+      display:grid;
+      grid-template-columns:1fr 40px;
+      align-items:center;
+      gap:10px;
+      margin-top:17px;
+    }
+
+    .track{
+      height:6px;
+      border:1px solid rgba(141,255,217,.46);
+      background:rgba(141,255,217,.035);
+      overflow:hidden;
+    }
+
+    #bar{
+      width:0%;
+      height:100%;
+      background:var(--mint);
+      box-shadow:0 0 8px rgba(141,255,217,.48);
+      transition:width .15s linear;
+    }
+
+    #percent{
+      font-size:10px;
+      color:var(--mint-dim);
+    }
+
+    /* scanlines */
+    .scanlines,
+    .noise,
+    .vignette,
+    .glass{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+
+    .scanlines{
+      z-index:5;
+      opacity:.34;
+      background:repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.022) 0px,
+        rgba(255,255,255,.022) 1px,
+        rgba(0,0,0,.115) 2px,
+        rgba(0,0,0,.115) 4px
+      );
+      animation:scanMove 8s linear infinite;
+    }
+
+    /* CSS-only fine grain: no image file needed */
+    .noise{
+      z-index:6;
+      opacity:.18;
+      mix-blend-mode:screen;
+      background-image:
+        radial-gradient(circle at 17% 23%,rgba(141,255,217,.08) 0 .45px,transparent .7px),
+        radial-gradient(circle at 72% 41%,rgba(255,255,255,.055) 0 .42px,transparent .72px),
+        radial-gradient(circle at 39% 78%,rgba(141,255,217,.065) 0 .5px,transparent .8px);
+      background-size:7px 9px,11px 13px,13px 15px;
+      animation:noiseMove .18s steps(2,end) infinite;
+    }
+
+    .vignette{
+      z-index:7;
+      background:radial-gradient(
+        ellipse at center,
+        transparent 39%,
+        rgba(0,0,0,.12) 62%,
+        rgba(0,0,0,.66) 100%
+      );
+    }
+
+    .glass{
+      z-index:8;
+      opacity:.18;
+      background:
+        linear-gradient(104deg,
+          transparent 0%,
+          rgba(255,255,255,.025) 46%,
+          transparent 58%);
+    }
+
+    #boot.shutdown .crt{
+      animation:crtOff .52s cubic-bezier(.2,.72,.2,1) forwards;
+    }
+
+    /* ---------- MAIN PLACEHOLDER ---------- */
+
+    #main{
+      position:fixed;
+      inset:0;
+      min-height:100vh;
+      min-height:100dvh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:26px;
+      background:#090909;
+      color:#fff;
+    }
+
+    .main-inner{
+      text-align:center;
+      opacity:0;
+      transform:translateY(7px);
+      animation:mainIn .9s ease forwards;
+    }
+
+    .kicker{
+      font-family:"JetBrains Mono",monospace;
+      font-size:13px;
+      color:rgba(255,255,255,.72);
+      margin-bottom:20px;
+    }
+
+    #days{
+      font-size:72px;
+      line-height:1;
+      font-weight:600;
+      letter-spacing:-.05em;
+    }
+
+    .days-label{
+      margin-top:7px;
+      font-size:12px;
+      color:rgba(255,255,255,.45);
+    }
+
+    #clock{
+      margin-top:20px;
+      font-size:29px;
+      font-weight:500;
+      letter-spacing:.07em;
+    }
+
+    @keyframes titleIn{
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    @keyframes blink{
+      0%,48%{opacity:1}
+      49%,100%{opacity:0}
+    }
+
+    @keyframes screenLife{
+      0%,100%{
+        filter:brightness(.99);
+        transform:perspective(850px) rotateX(.55deg) scaleX(.985) translate(0,0);
+      }
+      46%{
+        filter:brightness(1.012);
+        transform:perspective(850px) rotateX(.55deg) scaleX(.985) translate(.12px,-.08px);
+      }
+      49%{
+        filter:brightness(.985);
+        transform:perspective(850px) rotateX(.55deg) scaleX(.985) translate(-.18px,.12px);
+      }
+    }
+
+    @keyframes scanMove{
+      from{background-position-y:0}
+      to{background-position-y:44px}
+    }
+
+    @keyframes noiseMove{
+      0%{transform:translate(0,0)}
+      25%{transform:translate(-.7px,.3px)}
+      50%{transform:translate(.5px,-.5px)}
+      75%{transform:translate(-.3px,-.2px)}
+      100%{transform:translate(0,0)}
+    }
+
+    @keyframes crtOff{
+      0%{
+        transform:perspective(850px) rotateX(.55deg) scaleX(.985) scaleY(1);
+        filter:brightness(1);
+        opacity:1;
+      }
+      46%{
+        transform:perspective(850px) rotateX(.55deg) scaleX(1.02) scaleY(.034);
+        filter:brightness(4.5);
+        opacity:1;
+      }
+      72%{
+        transform:perspective(850px) rotateX(.55deg) scaleX(.24) scaleY(.009);
+        filter:brightness(7);
+        opacity:1;
+      }
+      100%{
+        transform:perspective(850px) rotateX(.55deg) scaleX(0) scaleY(0);
+        opacity:0;
+      }
+    }
+
+    @keyframes mainIn{
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    @media(max-width:380px){
+      .content{padding-left:23px;padding-right:23px}
+      .terminal{margin-top:68px}
+      #status{font-size:12px}
+      #value{font-size:16px}
+    }
+  </style>
 </head>
 
 <body>
-  <main id="app">
-    <!-- OPENING / CRT TERMINAL -->
-    <section id="boot-screen" class="screen screen--visible" aria-live="polite">
-      <div class="crt-shell">
-        <div class="crt-screen">
-          <div class="crt-content">
-            <h1 class="terminal-title">HỆ THỐNG GHÉP ĐÔI VŨ TRỤ</h1>
 
-            <div class="terminal-stage">
-              <p id="status-line" class="status-line">
-                <span class="prompt">&gt;</span>
-                <span id="status-text"></span><span id="cursor" class="cursor">▋</span>
-              </p>
+  <section id="boot">
+    <div class="crt">
+      <div class="content">
+        <h1 id="title">HỆ THỐNG GHÉP ĐÔI VŨ TRỤ</h1>
 
-              <p id="value-line" class="value-line"></p>
+        <div class="terminal">
+          <p id="status">
+            <span class="prompt">&gt;</span><span id="statusText"></span><span id="cursor">▋</span>
+          </p>
 
-              <div id="progress-wrap" class="progress-wrap hidden" aria-hidden="true">
-                <div class="progress-track">
-                  <div id="progress-bar" class="progress-bar"></div>
-                </div>
-                <span id="progress-label" class="progress-label">0%</span>
-              </div>
-            </div>
+          <p id="value"></p>
+
+          <div id="progress" class="hidden">
+            <div class="track"><div id="bar"></div></div>
+            <span id="percent">0%</span>
           </div>
-
-          <div class="crt-vignette" aria-hidden="true"></div>
-          <div class="crt-scanlines" aria-hidden="true"></div>
-          <div class="crt-noise" aria-hidden="true"></div>
-          <div id="crt-flash" class="crt-flash" aria-hidden="true"></div>
         </div>
       </div>
-    </section>
 
-    <!-- MAIN PAGE / TEMPORARY PLACEHOLDER -->
-    <section id="main-screen" class="screen hidden">
-      <div class="main-content">
-        <p class="main-kicker">the universe has been right for</p>
+      <div class="scanlines"></div>
+      <div class="noise"></div>
+      <div class="vignette"></div>
+      <div class="glass"></div>
+    </div>
+  </section>
 
-        <div class="counter-block">
-          <div id="days" class="days">000</div>
-          <div class="days-label">days</div>
-        </div>
+  <section id="main" class="hidden">
+    <div class="main-inner">
+      <p class="kicker">the universe has been right for</p>
+      <div id="days">000</div>
+      <div class="days-label">days</div>
+      <div id="clock">00:00:00</div>
+    </div>
+  </section>
 
-        <div id="clock" class="clock">00:00:00</div>
-      </div>
-    </section>
-  </main>
+  <script>
+    (() => {
+      const boot = document.getElementById("boot");
+      const main = document.getElementById("main");
+      const statusText = document.getElementById("statusText");
+      const value = document.getElementById("value");
+      const cursor = document.getElementById("cursor");
+      const progress = document.getElementById("progress");
+      const bar = document.getElementById("bar");
+      const percent = document.getElementById("percent");
+      const days = document.getElementById("days");
+      const clock = document.getElementById("clock");
 
-  <script src="script.js"></script>
+      const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+      function setValue(text = "", isError = false) {
+        value.textContent = text;
+        value.classList.toggle("error", isError);
+      }
+
+      async function erase(speed = 12) {
+        while (statusText.textContent.length > 0) {
+          statusText.textContent = statusText.textContent.slice(0, -1);
+          await sleep(speed);
+        }
+      }
+
+      async function type(text, speed = 27) {
+        statusText.textContent = "";
+        for (const ch of text) {
+          statusText.textContent += ch;
+          let extra = 0;
+          if (ch === "," || ch === ".") extra = 45;
+          await sleep(speed + extra);
+        }
+      }
+
+      async function change(text, options = {}) {
+        const eraseSpeed = options.eraseSpeed ?? 11;
+        const typeSpeed = options.typeSpeed ?? 27;
+        const before = options.before ?? 130;
+        const after = options.after ?? 520;
+
+        await sleep(before);
+        await erase(eraseSpeed);
+        await type(text, typeSpeed);
+        await sleep(after);
+      }
+
+      async function remainingPeople() {
+        const numbers = [
+          ["8.147.922.380", 150],
+          ["5.902.471.013", 130],
+          ["2.482.193", 160],
+          ["151", 300],
+          ["12", 430],
+          ["3", 560],
+          ["2", 650],
+          ["1", 900]
+        ];
+
+        for (const [number, delay] of numbers) {
+          setValue("còn lại: " + number);
+          await sleep(delay);
+        }
+      }
+
+      async function heartSync() {
+        progress.classList.remove("hidden");
+
+        const values = [4, 11, 23, 39, 58, 72, 86, 94, 99, 100];
+
+        for (const n of values) {
+          bar.style.width = n + "%";
+          percent.textContent = n + "%";
+          await sleep(n >= 94 ? 250 : 120);
+        }
+
+        await sleep(400);
+        progress.classList.add("hidden");
+        bar.style.width = "0%";
+        percent.textContent = "0%";
+      }
+
+      async function loveMeter() {
+        const values = [
+          ["38%", 120],
+          ["127%", 115],
+          ["541%", 105],
+          ["2137%", 105],
+          ["9999%", 130],
+          ["∞", 520]
+        ];
+
+        for (const [text, delay] of values) {
+          setValue(text);
+          await sleep(delay);
+        }
+
+        setValue("LỖI", true);
+        await sleep(700);
+
+        setValue("đang thử lại...");
+        await sleep(460);
+
+        setValue("LỖI", true);
+        await sleep(630);
+
+        setValue("Yêu quá. Không đo được.");
+        await sleep(1200);
+      }
+
+      function updateCounter() {
+        const start = new Date("2026-08-05T00:00:00+07:00");
+        let seconds = Math.max(0, Math.floor((Date.now() - start.getTime()) / 1000));
+
+        const d = Math.floor(seconds / 86400);
+        seconds %= 86400;
+
+        const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+        seconds %= 3600;
+
+        const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const s = String(seconds % 60).padStart(2, "0");
+
+        days.textContent = String(d).padStart(3, "0");
+        clock.textContent = h + ":" + m + ":" + s;
+      }
+
+      async function finish() {
+        cursor.style.visibility = "hidden";
+        setValue("");
+        await sleep(450);
+
+        boot.classList.add("shutdown");
+        await sleep(580);
+
+        boot.classList.add("hidden");
+        main.classList.remove("hidden");
+
+        updateCounter();
+        setInterval(updateCounter, 1000);
+      }
+
+      async function run() {
+        await sleep(850);
+
+        await type("Đang khởi động hệ thống...", 33);
+        await sleep(600);
+
+        await change("Đang quét 8.147.922.381 con người...", {
+          typeSpeed: 21,
+          after: 760
+        });
+
+        await change("Đang loại bỏ các phương án không phù hợp...", {
+          typeSpeed: 21,
+          after: 180
+        });
+
+        await remainingPeople();
+        await sleep(700);
+        setValue("");
+
+        await change("Đang kiểm tra kết quả...", {
+          typeSpeed: 26,
+          after: 420
+        });
+
+        setValue("1 người phù hợp.");
+        await sleep(900);
+        setValue("");
+
+        await change("Đang đồng bộ trái tim...", {
+          typeSpeed: 26,
+          after: 180
+        });
+
+        await heartSync();
+        setValue("Đồng bộ thành công.");
+        await sleep(850);
+        setValue("");
+
+        await change("Đang đo mức độ yêu...", {
+          typeSpeed: 28,
+          after: 180
+        });
+
+        await loveMeter();
+        setValue("");
+
+        await change("Đang xác nhận lần cuối...", {
+          typeSpeed: 28,
+          after: 620
+        });
+
+        setValue("...");
+        await sleep(950);
+        setValue("");
+
+        await change("Ôi. Cuối cùng cũng tìm đúng người rồi.", {
+          eraseSpeed: 14,
+          typeSpeed: 52,
+          before: 0,
+          after: 1450
+        });
+
+        await finish();
+      }
+
+      run().catch(err => {
+        console.error(err);
+        statusText.textContent = "Hệ thống gặp lỗi.";
+        setValue("Nhưng vẫn tìm đúng người rồi.");
+      });
+    })();
+  </script>
 </body>
 </html>
+
