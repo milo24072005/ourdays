@@ -583,7 +583,18 @@
 
         await loveMeter();
         setValue("");
+        
+        await change("Hệ thống gặp lỗi.", {
+        typeSpeed: 36,
+        after: 500
+        });
+        setValue("Không sao.");
+        await sleep(700);
 
+setValue("Vẫn tìm đúng người rồi.");
+await sleep(1300);
+
+setValue("");
         await change("Đang xác nhận lần cuối...", {
           typeSpeed: 36,
           after: 800
