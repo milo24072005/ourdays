@@ -240,21 +240,59 @@
     #main{
       position:fixed;
       inset:0;
+      width:100vw;
       min-height:100vh;
       min-height:100dvh;
+
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:center;
-      padding:26px;
-      background:#090909;
+
+      padding:0;
+
+      background-color:#090909;
+      background-image:
+        linear-gradient(
+          rgba(0,0,0,.06),
+          rgba(0,0,0,.06)
+        ),
+        url("background.gif");
+
+      background-repeat:no-repeat;
+      background-position:center center;
+      background-size:cover;
+
+      image-rendering:pixelated;
+
       color:#fff;
     }
 
     .main-inner{
+      width:100%;
+      min-height:100vh;
+      min-height:100dvh;
+
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+
+      padding:
+        max(24px,env(safe-area-inset-top))
+        24px
+        max(24px,env(safe-area-inset-bottom));
+
+      padding-top:18vh;
+
       text-align:center;
+
       opacity:0;
       transform:translateY(7px);
       animation:mainIn .9s ease forwards;
+
+      text-shadow:
+        0 2px 5px rgba(0,0,0,.75),
+        0 0 10px rgba(0,0,0,.35);
     }
 
     .kicker{
@@ -583,18 +621,7 @@
 
         await loveMeter();
         setValue("");
-        
-        await change("Hệ thống gặp lỗi.", {
-        typeSpeed: 36,
-        after: 500
-        });
-        setValue("Không sao.");
-        await sleep(700);
 
-setValue("Vẫn tìm đúng người rồi.");
-await sleep(1300);
-
-setValue("");
         await change("Đang xác nhận lần cuối...", {
           typeSpeed: 36,
           after: 800
